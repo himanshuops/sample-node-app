@@ -1,23 +1,16 @@
 version: 0.2
 
 phases:
-  pre_build:
+  install:
+    runtime-versions:
+      nodejs: 18
     commands:
-      - echo "🔐 Logging in to ECR (ap-south-1)"
-      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 251943883984.dkr.ecr.ap-south-1.amazonaws.com
-      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-      - REPO_URI=251943883984.dkr.ecr.ap-south-1.amazonaws.com/sample-node-app_frontend
+      - npm install
+
   build:
     commands:
-      - echo "🐳 Building Docker image"
-      - docker build -t $REPO_URI:$IMAGE_TAG .
-  post_build:
-    commands:
-      - echo "🚀 Pushing Docker image to ECR"
-      - docker push $REPO_URI:$IMAGE_TAG
-      - echo "📦 Creating imagedefinitions.json for ECS"
-      - printf '[{"name":"node-container","imageUri":"%s"}]' $REPO_URI:$IMAGE_TAG > imagedefinitions.json
+      - npm run build
 
 artifacts:
   files:
-    - imagedefinitions.json
+    - '**/*'
